@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "657351478694",
+    "project_id": "fuelmanagement-1d476",
+    "storage_bucket": "fuelmanagement-1d476.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657351478694:android:e4af803521986cdb229367",
+        "android_client_info": {
+          "package_name": "com.fuelmanagement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "657351478694-qissuad1m2s430qiar6u9s31gf137t1j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2iEkvQHPVEZN4dkmHx4fccFRHx5-wVEc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "657351478694-qissuad1m2s430qiar6u9s31gf137t1j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
