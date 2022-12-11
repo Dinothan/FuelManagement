@@ -1,4 +1,4 @@
-export const fonts= {
+export const fonts = {
   primaryS: {
     100: {
       normal: 'LexendDeca-Regular',

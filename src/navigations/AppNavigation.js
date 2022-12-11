@@ -13,12 +13,12 @@ const RootStack = createStackNavigator();
 const AuthStackScreen = () => (
   <AuthStack.Navigator>
     <AuthStack.Screen
-      name="SignIn"
+      name="Login"
       component={Login}
       options={{headerShown: false}}
     />
     <AuthStack.Screen
-      name="SignUp"
+      name="Signup"
       component={Signup}
       options={{headerShown: false}}
     />

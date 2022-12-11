@@ -9,6 +9,7 @@ import MainStack from './HomeTabScreen';
 import {colors} from '../config/colors';
 import {VStack} from 'native-base';
 import Icon from 'react-native-vector-icons/AntDesign';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CustomDrawerContent = props => {
   return (
@@ -26,7 +27,10 @@ const CustomDrawerContent = props => {
       </View>
       <DrawerItem
         label="Sign Out"
-        onPress={() => props.logout()}
+        onPress={() => {
+          AsyncStorage.removeItem('@storage_Key');
+          props.navigation.navigate('Login');
+        }}
         labelStyle={{color: colors.neutral[700], fontSize: 12}}
       />
     </DrawerContentScrollView>

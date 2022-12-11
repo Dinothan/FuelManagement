@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {View, Text, Touchable, TouchableOpacity} from 'react-native';
 import Background from './Background';
@@ -50,32 +51,34 @@ const Signup = props => {
               display: 'flex',
               flexDirection: 'row',
               width: '78%',
-              paddingRight: 16
+              paddingRight: 16,
             }}>
             <Text style={{color: 'grey', fontSize: 16}}>
               By signing in, you agree to our{' '}
             </Text>
             <Text style={{color: darkGreen, fontWeight: 'bold', fontSize: 16}}>
-              Terms & Conditions
+              Terms &
             </Text>
           </View>
+          <Text style={{color: darkGreen, fontWeight: 'bold', fontSize: 16}}>
+            Conditions <Text style={{color: 'grey', fontSize: 16}}>and </Text>{' '}
+            Privacy Policy
+          </Text>
 
-          <View
+          {/* <View
             style={{
               display: 'flex',
               flexDirection: 'row',
-              justifyContent :"center",
+              justifyContent: 'center',
               width: '78%',
               paddingRight: 16,
-              marginBottom: 10
+              marginBottom: 10,
             }}>
-            <Text style={{color: 'grey', fontSize: 16}}>
-              and {" "}
-            </Text>
+            <Text style={{color: 'grey', fontSize: 16}}>and </Text>
             <Text style={{color: darkGreen, fontWeight: 'bold', fontSize: 16}}>
               Privacy Policy
             </Text>
-          </View>
+          </View> */}
           <Btn
             textColor="white"
             bgColor={darkGreen}

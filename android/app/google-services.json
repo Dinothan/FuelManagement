@@ -1,33 +1,34 @@
 {
   "project_info": {
-    "project_number": "657351478694",
-    "project_id": "fuelmanagement-1d476",
-    "storage_bucket": "fuelmanagement-1d476.appspot.com"
+    "project_number": "884914994746",
+    "firebase_url": "https://iot-fueltheft-detection-system-default-rtdb.firebaseio.com",
+    "project_id": "iot-fueltheft-detection-system",
+    "storage_bucket": "iot-fueltheft-detection-system.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:657351478694:android:e4af803521986cdb229367",
+        "mobilesdk_app_id": "1:884914994746:android:e8622d0e698c924d42bf03",
         "android_client_info": {
           "package_name": "com.fuelmanagement"
         }
       },
       "oauth_client": [
         {
-          "client_id": "657351478694-qissuad1m2s430qiar6u9s31gf137t1j.apps.googleusercontent.com",
+          "client_id": "884914994746-emv8mu6pouqeg4222a1e7o2us8nhku0d.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB2iEkvQHPVEZN4dkmHx4fccFRHx5-wVEc"
+          "current_key": "AIzaSyD2_SMsbyjmEiBF872eIEsUZcgksEYLwyE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "657351478694-qissuad1m2s430qiar6u9s31gf137t1j.apps.googleusercontent.com",
+              "client_id": "884914994746-emv8mu6pouqeg4222a1e7o2us8nhku0d.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -1,24 +1,75 @@
-import React from 'react';
-import {View, Text, Button, StyleSheet, StatusBar} from 'react-native';
-import {useTheme} from '@react-navigation/native';
-import {BarChart, LineChart, PieChart} from 'react-native-gifted-charts';
+/* eslint-disable react-native/no-inline-styles */
+import React, {useEffect} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {PieChart} from 'react-native-gifted-charts';
+import {db} from '../config/real-time-db';
+import {ref, onValue, update} from 'firebase/database';
+import {useState} from 'react';
+import {ScrollView, Switch} from 'native-base';
 
 const HomeScreen = ({navigation}) => {
-  const {colors} = useTheme();
+  const [deviceData, setDeviceData] = useState([]);
+  const [obj, setObj] = useState({});
 
-  const theme = useTheme();
+  useEffect(() => {
+    const readData1 = ref(db, '/');
+    console.log('readData: ', readData1);
 
-  const pieData = [
-    {
-      value: 47,
-      color: '#009FFF',
-      gradientCenterColor: '#006DFF',
-      focused: true,
-    },
-    {value: 40, color: '#93FCF8', gradientCenterColor: '#3BE9DE'},
-    {value: 16, color: '#BDB2FA', gradientCenterColor: '#8F80F3'},
-    {value: 3, color: '#FFA5BA', gradientCenterColor: '#FF7F97'},
-  ];
+    onValue(readData1, snapshot => {
+      const data = snapshot.val();
+      setObj(data);
+
+      // const obj = Object.keys(data);
+      // console.log('data: ', Object.keys(data));
+      // setObjArray(obj);
+
+      // const {
+      //   availableFuelCapacity,
+      //   fuelTheftDetect,
+      //   fuelTheftDetectRecTimeUTC,
+      //   isIgnitionOff,
+      //   isMute,
+      //   lowFuelDitect,
+      //   newFuelAmount,
+      //   newFuelAmountRecTimeUTC,
+      //   notifyMe,
+      //   tankDiameter,
+      //   tankHeight,
+      //   tankLength,
+      //   tankShape,
+      //   tankWidth,
+      // } = data;
+    });
+    // setDeviceData(arr);
+  }, []);
+
+  useEffect(() => {
+    const arr = [];
+    obj &&
+      Object.entries(obj).map(([key, value]) => {
+        console.log('value: ', value);
+        arr.push({key, value});
+      });
+    setDeviceData(arr);
+    arr.length > 0 &&
+      arr?.map((res, index) => {
+        if (res?.value?.tankShape === 'VRT_CYLINDER') {
+          const {availableFuelCapacity, tankDiameter, tankHeight} = res?.value;
+          const total =
+            3.14 * ((tankDiameter / 2) * (tankDiameter / 2)) * tankHeight;
+          const level = parseFloat((availableFuelCapacity / total) * 100);
+          const fuelLevel = Math.round(level * 100) / 100;
+          const test = [...arr];
+          console.log('test: ', test);
+          test[index].value.fuel = fuelLevel;
+          setDeviceData(test);
+        }
+      });
+  }, [obj]);
+
+  console.log('deviceData: ', deviceData);
+  console.log('obj: ', obj);
+  // console.log('fuel: ', fuel);
 
   const renderDot = color => {
     return (
@@ -34,7 +85,7 @@ const HomeScreen = ({navigation}) => {
     );
   };
 
-  const renderLegendComponent = () => {
+  const renderLegendComponent = fuel => {
     return (
       <>
         <View
@@ -50,30 +101,13 @@ const HomeScreen = ({navigation}) => {
               width: 120,
               marginRight: 20,
             }}>
-            {renderDot('#006DFF')}
-            <Text style={{color: 'white'}}>Excellent: 47%</Text>
+            {renderDot('#009FFF')}
+            <Text style={{color: 'white'}}>Fuel: {fuel}%</Text>
           </View>
           <View
             style={{flexDirection: 'row', alignItems: 'center', width: 120}}>
-            {renderDot('#8F80F3')}
-            <Text style={{color: 'white'}}>Okay: 16%</Text>
-          </View>
-        </View>
-        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: 120,
-              marginRight: 20,
-            }}>
-            {renderDot('#3BE9DE')}
-            <Text style={{color: 'white'}}>Good: 40%</Text>
-          </View>
-          <View
-            style={{flexDirection: 'row', alignItems: 'center', width: 120}}>
-            {renderDot('#FF7F97')}
-            <Text style={{color: 'white'}}>Poor: 3%</Text>
+            {renderDot('#93FCF8')}
+            <Text style={{color: 'white'}}>No fuel: {100 - fuel}%</Text>
           </View>
         </View>
       </>
@@ -81,47 +115,175 @@ const HomeScreen = ({navigation}) => {
   };
 
   return (
-    <View
-      style={{
-        // paddingVertical: 100,
-        backgroundColor: '#34448B',
-        flex: 1,
-      }}>
-      <View
-        style={{
-          margin: 20,
-          // padding: 16,
-          borderRadius: 20,
-          // backgroundColor: '#232B5D',
-        }}>
-        <Text style={{color: 'white', fontSize: 16, fontWeight: 'bold'}}>
-          Fuel capacity
-        </Text>
-        <View style={{padding: 20, alignItems: 'center'}}>
-          <PieChart
-            data={pieData}
-            donut
-            showGradient
-            sectionAutoFocus
-            radius={90}
-            innerRadius={60}
-            innerCircleColor={'#232B5D'}
-            centerLabelComponent={() => {
-              return (
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                  <Text
-                    style={{fontSize: 22, color: 'white', fontWeight: 'bold'}}>
-                    47%
-                  </Text>
-                  <Text style={{fontSize: 14, color: 'white'}}>Excellent</Text>
+    <ScrollView style={{backgroundColor: '#34448B'}}>
+      {deviceData &&
+        deviceData.length > 0 &&
+        deviceData.map(res => (
+          <View
+            key={res.key}
+            style={{
+              // paddingVertical: 100,
+
+              flex: 1,
+            }}>
+            <View
+              style={{
+                margin: 20,
+                // padding: 16,
+                borderRadius: 20,
+                // backgroundColor: '#232B5D',
+              }}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 26,
+                  fontWeight: 'bold',
+                  paddingBottom: 15,
+                }}>
+                Fuel tank ID: {res.key}
+              </Text>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 20,
+                  fontWeight: 'bold',
+                  paddingBottom: 15,
+                }}>
+                Engine
+              </Text>
+              <View
+                style={{
+                  display: 'flex',
+                  paddingBottom: 20,
+                  alignItems: 'center',
+                }}>
+                <View
+                  style={{
+                    height: 44,
+                    width: 215,
+                    backgroundColor: 'white',
+                    borderRadius: 25,
+                    borderWidth: 1,
+                    borderColor: 'green',
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    padding: 2,
+                  }}>
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    // onPress={() => updatedSwitchData(1)}
+                    style={{
+                      flex: 1,
+
+                      backgroundColor: 'green',
+                      borderRadius: 25,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        color: 'white',
+                      }}>
+                      On
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    // onPress={() => updatedSwitchData(2)}
+                    style={{
+                      flex: 1,
+
+                      backgroundColor: 'white',
+                      borderRadius: 25,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        color: 'black',
+                      }}>
+                      Off
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-              );
-            }}
-          />
-        </View>
-        {renderLegendComponent()}
-      </View>
-    </View>
+              </View>
+              <Text style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>
+                Fuel capacity
+              </Text>
+              <View style={{padding: 20, alignItems: 'center'}}>
+                <PieChart
+                  data={[
+                    {
+                      value: res?.value?.fuel ? res?.value?.fuel : 0,
+                      color: '#009FFF',
+                      gradientCenterColor: '#006DFF',
+                      focused: true,
+                    },
+                    {
+                      value: res?.value?.fuel ? res?.value?.fuel : 100,
+                      color: '#93FCF8',
+                      gradientCenterColor: '#3BE9DE',
+                    },
+                  ]}
+                  donut
+                  showGradient
+                  sectionAutoFocus
+                  radius={90}
+                  innerRadius={60}
+                  innerCircleColor={'#232B5D'}
+                  centerLabelComponent={() => {
+                    return (
+                      <View
+                        style={{
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <Text
+                          style={{
+                            fontSize: 22,
+                            color: 'white',
+                            fontWeight: 'bold',
+                          }}>
+                          {res?.value?.fuel}%
+                        </Text>
+                        <Text style={{fontSize: 14, color: 'white'}}>Fuel</Text>
+                      </View>
+                    );
+                  }}
+                />
+              </View>
+              {renderLegendComponent(res?.value?.fuel)}
+              <View>
+                <Text
+                  style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>
+                  Alarm
+                </Text>
+                <View style={{display: 'flex', alignItems: 'center'}}>
+                  <Switch
+                    size="lg"
+                    colorScheme="primary"
+                    defaultIsChecked
+                    isChecked={() => {
+                      if (res) {
+                        update(ref(db, `${res?.key}/`), {
+                          ...res,
+                          isMute: true,
+                        })
+                          .then(re => {
+                            console.log('re: ', re);
+                          })
+                          .catch(err => {
+                            console.log('err:', err);
+                          });
+                      }
+                    }}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        ))}
+    </ScrollView>
   );
 };
 

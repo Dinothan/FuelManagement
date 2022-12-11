@@ -8,6 +8,8 @@ import HomeScreen from '../screens/Home';
 import {colors} from '../config/colors';
 import {View, Text} from 'native-base';
 import LinearGradient from 'react-native-linear-gradient';
+import ConfigScreen from '../screens/Config';
+import Profile from '../screens/Profile';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -65,7 +67,7 @@ const HomeTabScreen = () => {
       />
       <Tab.Screen
         name="Config"
-        component={HomeScreen}
+        component={ConfigScreen}
         options={{
           tabBarLabel: 'Config',
           tabBarIcon: ({color, size}) => (
@@ -75,7 +77,7 @@ const HomeTabScreen = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={HomeScreen}
+        component={Profile}
         options={{
           tabBarLabel: 'Profile',
           tabBarIcon: ({color, size}) => (
