@@ -1,19 +1,32 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Switch} from 'react-native';
 import {PieChart} from 'react-native-gifted-charts';
 import {db} from '../config/real-time-db';
 import {ref, onValue, update} from 'firebase/database';
 import {useState} from 'react';
-import {ScrollView, Switch} from 'native-base';
+import {
+  Alert,
+  ScrollView,
+  // Switch,
+  HStack,
+  Box,
+  IconButton,
+  VStack,
+  CloseIcon,
+  Button,
+} from 'native-base';
+import moment from 'moment';
 
 const HomeScreen = ({navigation}) => {
   const [deviceData, setDeviceData] = useState([]);
   const [obj, setObj] = useState({});
+  const [alert, setAlert] = useState(false);
+  const [sw, setSw] = useState(false);
 
   useEffect(() => {
     const readData1 = ref(db, '/');
-    console.log('readData: ', readData1);
+    // console.log('readData: ', readData1);
 
     onValue(readData1, snapshot => {
       const data = snapshot.val();
@@ -47,7 +60,7 @@ const HomeScreen = ({navigation}) => {
     const arr = [];
     obj &&
       Object.entries(obj).map(([key, value]) => {
-        console.log('value: ', value);
+        // console.log('value: ', value);
         arr.push({key, value});
       });
     setDeviceData(arr);
@@ -56,19 +69,33 @@ const HomeScreen = ({navigation}) => {
         if (res?.value?.tankShape === 'VRT_CYLINDER') {
           const {availableFuelCapacity, tankDiameter, tankHeight} = res?.value;
           const total =
-            3.14 * ((tankDiameter / 2) * (tankDiameter / 2)) * tankHeight;
+            (3.14 * ((tankDiameter / 2) * (tankDiameter / 2)) * tankHeight) /
+            1000;
+          const test = [...arr];
+          test[index].value.total = total;
           const level = parseFloat((availableFuelCapacity / total) * 100);
           const fuelLevel = Math.round(level * 100) / 100;
-          const test = [...arr];
-          console.log('test: ', test);
+
+          // console.log('test: ', test);
           test[index].value.fuel = fuelLevel;
+
+          if (res?.value?.fuelTheftDetect) {
+            setAlert(true);
+          } else {
+            if (res?.value?.lowFuelDitect && fuelLevel < res?.value?.notifyMe) {
+              setAlert(true);
+            } else {
+              setAlert(false);
+            }
+          }
+
           setDeviceData(test);
         }
       });
   }, [obj]);
 
-  console.log('deviceData: ', deviceData);
-  console.log('obj: ', obj);
+  // console.log('deviceData: ', deviceData);
+  // console.log('obj: ', obj);
   // console.log('fuel: ', fuel);
 
   const renderDot = color => {
@@ -107,7 +134,9 @@ const HomeScreen = ({navigation}) => {
           <View
             style={{flexDirection: 'row', alignItems: 'center', width: 120}}>
             {renderDot('#93FCF8')}
-            <Text style={{color: 'white'}}>No fuel: {100 - fuel}%</Text>
+            <Text style={{color: 'white'}}>
+              No fuel: {parseFloat(100 - fuel).toFixed(2)}%
+            </Text>
           </View>
         </View>
       </>
@@ -126,6 +155,51 @@ const HomeScreen = ({navigation}) => {
 
               flex: 1,
             }}>
+            {alert && (
+              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <Alert maxW="400" status="error">
+                  <VStack space={1} flexShrink={1} w="100%">
+                    <HStack
+                      flexShrink={1}
+                      space={2}
+                      alignItems="center"
+                      justifyContent="space-between">
+                      <HStack flexShrink={1} space={2} alignItems="center">
+                        <Alert.Icon />
+                        <Text
+                          fontSize={18}
+                          fontWeight={'bold'}
+                          _dark={{
+                            color: 'coolGray.800',
+                          }}>
+                          Alert!
+                        </Text>
+                      </HStack>
+                      <IconButton
+                        variant="unstyled"
+                        _focus={{
+                          borderWidth: 0,
+                        }}
+                        icon={<CloseIcon size="3" />}
+                        _icon={{
+                          color: 'coolGray.600',
+                        }}
+                        onPress={() => setAlert(false)}
+                      />
+                    </HStack>
+
+                    <Text style={{color: 'black', fontSize: 18}}>
+                      {res?.value?.fuelTheftDetect
+                        ? `Threft detected on ${moment(
+                            res?.value?.newFuelAmountRecTimeUTC,
+                            's',
+                          ).format('DD/MM/YYYY')}`
+                        : `Your fuel percentage is less than ${res?.value?.notifyMe}%`}
+                    </Text>
+                  </VStack>
+                </Alert>
+              </View>
+            )}
             <View
               style={{
                 margin: 20,
@@ -210,6 +284,25 @@ const HomeScreen = ({navigation}) => {
               <Text style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>
                 Fuel capacity
               </Text>
+              <View style={{flexDirection: 'row'}}>
+                <Text
+                  style={{color: 'white', fontWeight: 'bold', fontSize: 16}}>
+                  Total fuel:{' '}
+                </Text>
+                <Text style={{color: 'white'}}>
+                  {parseFloat(res?.value?.total / 1000).toFixed(2)} liters
+                </Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <Text
+                  style={{color: 'white', fontWeight: 'bold', fontSize: 16}}>
+                  Available fuel:{' '}
+                </Text>
+                <Text style={{color: 'white'}}>
+                  {parseFloat(res?.value?.availableFuelCapacity).toFixed(2)}{' '}
+                  liters
+                </Text>
+              </View>
               <View style={{padding: 20, alignItems: 'center'}}>
                 <PieChart
                   data={[
@@ -220,7 +313,7 @@ const HomeScreen = ({navigation}) => {
                       focused: true,
                     },
                     {
-                      value: res?.value?.fuel ? res?.value?.fuel : 100,
+                      value: res?.value?.fuel ? 100 - res?.value?.fuel : 100,
                       color: '#93FCF8',
                       gradientCenterColor: '#3BE9DE',
                     },
@@ -253,31 +346,41 @@ const HomeScreen = ({navigation}) => {
                 />
               </View>
               {renderLegendComponent(res?.value?.fuel)}
+
               <View>
                 <Text
                   style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>
                   Alarm
                 </Text>
                 <View style={{display: 'flex', alignItems: 'center'}}>
-                  <Switch
-                    size="lg"
-                    colorScheme="primary"
-                    defaultIsChecked
-                    isChecked={() => {
-                      if (res) {
-                        update(ref(db, `${res?.key}/`), {
-                          ...res,
-                          isMute: true,
+                  {/* <Switch
+                    // size="lg"
+                    // colorScheme="primary"
+                    // value={res?.value?.isMute}
+                    value={sw}
+                    onValueChange={rrr => isCheckAlarm(res, rrr)}
+                  /> */}
+                  <Button
+                    key={'md'}
+                    size={'md'}
+                    width={200}
+                    borderRadius={15}
+                    onPress={() => {
+                      update(ref(db, `${res?.key}/`), {
+                        ...res.value,
+                        isMute: !res?.value?.isMute,
+                      })
+                        .then(re => {
+                          console.log('re: ', re);
                         })
-                          .then(re => {
-                            console.log('re: ', re);
-                          })
-                          .catch(err => {
-                            console.log('err:', err);
-                          });
-                      }
-                    }}
-                  />
+                        .catch(err => {
+                          console.log('err:', err);
+                        });
+                      // if (res?.value?.isMute) {
+                      // }
+                    }}>
+                    {res?.value?.isMute ? 'Alarm' : 'Stop'}
+                  </Button>
                 </View>
               </View>
             </View>

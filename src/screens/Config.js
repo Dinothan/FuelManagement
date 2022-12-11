@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text} from 'react-native';
 import {Box, Center, Select, CheckIcon, Input, Button} from 'native-base';
 import {db} from '../config/real-time-db';
-import {ref, set} from 'firebase/database';
+import {ref, set, onValue} from 'firebase/database';
 import {useState} from 'react';
 
 const ConfigScreen = ({navigation}) => {
@@ -13,6 +13,27 @@ const ConfigScreen = ({navigation}) => {
   const [length, setLength] = useState();
   const [height, setHeight] = useState();
   const [width, setWidth] = useState();
+  const [obj, setObj] = useState({});
+  const [per, setPer] = useState({});
+
+  useEffect(() => {
+    const readData1 = ref(db, '/');
+
+    onValue(readData1, snapshot => {
+      const data = snapshot.val();
+      setObj(data);
+    });
+  }, []);
+
+  useEffect(() => {
+    const arr = [];
+    obj &&
+      Object.entries(obj).map(([key, value]) => {
+        // console.log('value: ', value);
+        arr.push({key, value});
+      });
+    setDeviceData(arr);
+  }, [obj]);
 
   return (
     <View
@@ -56,6 +77,25 @@ const ConfigScreen = ({navigation}) => {
                     value="HORIZ_CYLINDER"
                   />
                   <Select.Item label="Rectangle" value="RECTANGLE" />
+                </Select>
+                <Select
+                  width={'300'}
+                  marginBottom={5}
+                  selectedValue={per}
+                  minWidth="200"
+                  accessibilityLabel="Select fuel tank shape"
+                  placeholder="Notify %"
+                  color={'white'}
+                  fontWeight={'bold'}
+                  _selectedItem={{
+                    bg: 'teal.600',
+                    endIcon: <CheckIcon size="5" />,
+                  }}
+                  mt={2}
+                  onValueChange={itemValue => setPer(itemValue)}>
+                  <Select.Item label="10" value="10" />
+                  <Select.Item label="20" value="20" />
+                  <Select.Item label="30" value="30" />
                 </Select>
                 {shape && (
                   <>
@@ -119,7 +159,9 @@ const ConfigScreen = ({navigation}) => {
                   width={200}
                   borderRadius={15}
                   onPress={() => {
-                    let num = Number('0000000001');
+                    // let num = Number('0000000001');
+                    let num = deviceData[deviceData.length - 1].key;
+                    console.log('val: ', `000000000${num + 1}/`);
 
                     if (shape === 'VRT_CYLINDER') {
                       set(ref(db, `000000000${num + 1}/`), {
